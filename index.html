@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МОЙ AI — От нуля до результата</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F4EF;--warm-dark:#1C1A17;--accent:#C8622A;
+  --accent-light:#F2DDD1;--mid:#6B6560;--border:rgba(28,26,23,0.12);
+  --font-display:'Playfair Display',serif;--font-body:'Manrope',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--cream);color:var(--warm-dark);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1rem 5%;background:rgba(247,244,239,0.94);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:1.2rem;letter-spacing:0.05em}
+.nav-cta{background:var(--accent);color:#fff;border:none;padding:0.65rem 1.6rem;border-radius:2rem;font-family:var(--font-body);font-size:0.88rem;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity 0.2s}
+.nav-cta:hover{opacity:0.85}
+
+.timer-bar{background:var(--warm-dark);color:#fff;padding:0.7rem 5%;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap;text-align:center;margin-top:56px}
+.timer-bar p{font-size:0.82rem;font-weight:500}
+.timer-countdown{display:flex;gap:0.4rem;align-items:center}
+.timer-unit{background:var(--accent);padding:0.2rem 0.55rem;border-radius:0.3rem;font-weight:700;font-size:0.95rem;min-width:2rem;text-align:center}
+.timer-sep{font-weight:700}
+
+/* HERO */
+.hero{min-height:95vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:3rem 5% 4rem;position:relative;overflow:hidden}
+.hero-line{position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;animation:drawLine 1.2s ease 0.8s forwards}
+@keyframes drawLine{to{transform:scaleX(1)}}
+.hero-deco{position:absolute;right:-2%;top:50%;transform:translateY(-50%);opacity:0.04;font-family:var(--font-display);font-size:clamp(80px,14vw,180px);font-weight:700;line-height:1;user-select:none;pointer-events:none}
+.hero-tag{display:inline-block;font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);border:0.5px solid var(--accent);padding:0.28rem 0.9rem;border-radius:2rem;margin-bottom:1.5rem;opacity:0;animation:slideUp 0.6s ease 0.2s forwards}
+.hero h1{font-family:var(--font-display);font-size:clamp(3rem,9vw,7.5rem);font-weight:700;line-height:1;letter-spacing:-0.02em;margin-bottom:0.3rem;white-space:nowrap}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-from{font-family:var(--font-display);font-size:clamp(1rem,2.5vw,1.6rem);font-style:italic;color:var(--mid);margin-bottom:1rem;opacity:0;animation:slideUp 0.6s ease 0.85s forwards}
+.hero-sub{font-size:clamp(0.95rem,1.8vw,1.1rem);color:var(--mid);max-width:520px;margin:0 auto 1.8rem;line-height:1.6;opacity:0;animation:slideUp 0.6s ease 0.95s forwards}
+.hero-sub strong{color:var(--warm-dark);font-weight:600}
+
+.hero-video{width:100%;max-width:300px;margin:0 auto 2rem;opacity:0;animation:slideUp 0.6s ease 1.05s forwards}
+.video-wrap-sm{aspect-ratio:9/16;background:rgba(28,26,23,0.04);border:1.5px dashed rgba(200,98,42,0.3);border-radius:1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.7rem;cursor:pointer;transition:border-color 0.2s;overflow:hidden}
+.video-wrap-sm iframe{width:100%;height:100%;border:none;border-radius:1rem}
+.video-wrap-sm.has-video{border:none;background:#000;padding:0}
+.video-wrap-sm:hover{border-color:var(--accent)}
+.video-play-sm{width:52px;height:52px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;transition:transform 0.2s}
+.video-wrap-sm:hover .video-play-sm{transform:scale(1.08)}
+.video-play-sm svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.video-hint-sm{font-size:0.78rem;color:var(--mid)}
+
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;justify-content:center;opacity:0;animation:slideUp 0.6s ease 1.15s forwards}
+.btn-primary{position:relative;background:var(--accent);color:#fff;padding:0.95rem 2.2rem;border-radius:2rem;font-family:var(--font-body);font-size:1rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:transform 0.2s,opacity 0.2s;display:inline-flex;align-items:center;gap:0.6rem}
+.btn-primary:hover{transform:translateY(-2px);opacity:0.92}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.5s ease infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
+.btn-ghost{color:var(--warm-dark);padding:0.95rem 1.8rem;border-radius:2rem;font-family:var(--font-body);font-size:1rem;font-weight:500;text-decoration:none;border:1.5px solid var(--border);transition:border-color 0.2s;display:inline-block}
+.btn-ghost:hover{border-color:var(--warm-dark)}
+.hero-note{font-size:0.75rem;color:var(--mid);margin-top:0.8rem;opacity:0;animation:slideUp 0.6s ease 1.25s forwards}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes charIn{to{opacity:1;transform:translateY(0)}}
+.char{display:inline-block;opacity:0;transform:translateY(30px);animation:charIn 0.5s ease forwards}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--warm-dark);color:#fff;padding:0.8rem 1.8rem;border-radius:2rem;font-size:0.9rem;font-weight:500;z-index:999;transition:transform 0.4s ease,opacity 0.4s ease;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* TICKER */
+.ticker-wrap{overflow:hidden;background:var(--accent);padding:0.6rem 0}
+.ticker{display:flex;animation:ticker 12s linear infinite;white-space:nowrap}
+.ticker-item{font-size:0.75rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;padding:0 2rem}
+.ticker-sep{color:rgba(255,255,255,0.4);padding:0;font-size:0.75rem}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+section{padding:5rem 5%}
+.section-label{font-size:0.67rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem}
+h2{font-family:var(--font-display);font-size:clamp(1.8rem,4.5vw,3rem);font-weight:700;line-height:1.15;margin-bottom:1.8rem}
+h2 em{font-style:italic;color:var(--accent)}
+
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.65s ease,transform 0.65s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+/* NAGNETAL */
+.nagnetal{padding:5rem 5%;background:var(--warm-dark);color:#fff;text-align:center}
+.nagnetal h2{color:#fff;font-size:clamp(2rem,5vw,3.5rem)}
+.nagnetal h2 em{color:var(--accent)}
+.nagnetal-sub{font-size:0.95rem;color:rgba(255,255,255,0.6);max-width:540px;margin:0 auto 2rem;line-height:1.7}
+.nagnetal-quote{font-family:var(--font-display);font-size:1.05rem;font-style:italic;color:rgba(255,255,255,0.45);max-width:500px;margin:0 auto;border-top:0.5px solid rgba(255,255,255,0.1);padding-top:1.5rem}
+
+/* TOGGLE BLOCKS */
+.block-toggle{cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border:0.5px solid var(--border);border-radius:0.8rem;background:#fff;margin-top:2rem;transition:border-color 0.2s}
+.block-toggle:hover{border-color:var(--accent)}
+.block-toggle span{font-weight:600;font-size:0.92rem}
+.block-toggle svg{transition:transform 0.3s;color:var(--accent);flex-shrink:0}
+.block-toggle.open svg{transform:rotate(180deg)}
+.block-body{max-height:0;overflow:hidden;transition:max-height 0.45s ease}
+
+/* PAIN GRID */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;border:1px solid var(--border);border-top:none;border-radius:0 0 0.8rem 0.8rem;overflow:hidden}
+.pain-item{padding:1.4rem;background:#fff;display:flex;flex-direction:column;gap:0.5rem}
+.pain-icon{width:30px;height:30px;flex-shrink:0}
+.pain-item p{font-size:0.83rem;color:var(--mid);line-height:1.6}
+
+/* SUMMER */
+.summer{background:var(--accent);color:#fff;padding:3.5rem 5%;text-align:center}
+.summer h2{color:#fff;font-size:clamp(1.5rem,3.5vw,2.2rem);margin-bottom:0.7rem}
+.summer p{font-size:0.9rem;color:rgba(255,255,255,0.82);max-width:460px;margin:0 auto}
+
+/* BENEFITS */
+.benefits-hook{font-family:var(--font-display);font-size:clamp(1rem,2vw,1.3rem);font-style:italic;color:var(--mid);margin-bottom:1.5rem;line-height:1.4}
+.benefits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;border:1px solid var(--border);border-top:none;border-radius:0 0 0.8rem 0.8rem;overflow:hidden}
+.benefit-item{padding:1.4rem;background:#fff;display:flex;flex-direction:column;gap:0.45rem}
+.benefit-icon{width:32px;height:32px}
+.benefit-value{font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--accent);line-height:1}
+.benefit-label{font-size:0.8rem;font-weight:600}
+.benefit-sub{font-size:0.74rem;color:var(--mid);line-height:1.5}
+.benefits-total{margin-top:1.2rem;padding:1.2rem 1.4rem;background:var(--warm-dark);color:#fff;border-radius:0.8rem;font-size:0.88rem;line-height:1.6}
+.benefits-total strong{color:var(--accent)}
+.benefits-personal{margin-top:0.8rem;padding:1rem 1.4rem;border:1.5px solid var(--accent);border-radius:0.8rem;background:var(--accent-light);font-size:0.85rem;color:var(--mid);font-style:italic;line-height:1.6}
+
+/* CASES */
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;border:1px solid var(--border);border-top:none;border-radius:0 0 0.8rem 0.8rem;overflow:hidden}
+.case-item{padding:1.4rem;background:#fff;display:flex;flex-direction:column;gap:0.35rem}
+.case-label{font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent)}
+.case-item h4{font-size:0.88rem;font-weight:600}
+.case-item p{font-size:0.78rem;color:var(--mid);line-height:1.5}
+
+/* CURRICULUM */
+.lessons-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:0.6rem;padding:1.4rem;border:1px solid var(--border);border-top:none;border-radius:0 0 0.8rem 0.8rem;background:#fff}
+.lesson-card{border:0.5px solid var(--border);border-radius:0.7rem;padding:0.9rem;cursor:pointer;transition:border-color 0.2s,background 0.2s,transform 0.2s;display:flex;flex-direction:column;gap:0.25rem}
+.lesson-card:hover{border-color:var(--accent);background:var(--accent-light);transform:translateY(-3px)}
+.lesson-card.active{border-color:var(--accent);background:var(--accent-light)}
+.lesson-num-card{font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--accent);line-height:1}
+.lesson-icon-card{width:18px;height:18px;margin-bottom:0.1rem}
+.lesson-title-card{font-size:0.73rem;font-weight:600;line-height:1.3}
+.lesson-detail{padding:1rem 1.4rem 1.4rem;background:var(--accent-light);font-size:0.84rem;color:var(--mid);line-height:1.7;display:none;border:1px solid var(--border);border-top:none}
+.lesson-detail.visible{display:block}
+.lesson-detail strong{color:var(--warm-dark);font-weight:600;display:block;margin-bottom:0.3rem}
+
+/* FOR WHO */
+.forwhom-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+@media(max-width:580px){.forwhom-grid{grid-template-columns:1fr}}
+.forwhom-col h4{font-size:0.68rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.8rem}
+.forwhom-col.yes h4{color:var(--accent)}
+.forwhom-col.no h4{color:var(--mid)}
+.forwhom-list{list-style:none}
+.forwhom-list li{font-size:0.85rem;padding:0.42rem 0;border-bottom:0.5px solid var(--border);display:flex;gap:0.5rem;align-items:flex-start}
+
+/* PRICING */
+.pricing{background:var(--warm-dark);color:#fff;padding:5rem 5%}
+.pricing .section-label{color:rgba(200,98,42,0.8)}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:1.1rem;margin-top:2rem}
+.price-card{border:0.5px solid rgba(255,255,255,0.1);border-radius:1rem;padding:1.7rem 1.3rem;position:relative;transition:transform 0.2s}
+.price-card:hover{transform:translateY(-4px)}
+.price-card.featured{border-color:var(--accent);border-width:1.5px}
+.price-badge{position:absolute;top:-0.65rem;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.75rem;border-radius:2rem;white-space:nowrap}
+.price-label{font-size:0.7rem;color:rgba(255,255,255,0.38);margin-bottom:0.3rem}
+.price-amount{font-family:var(--font-display);font-size:2.3rem;font-weight:700;line-height:1;margin-bottom:0.2rem}
+.price-period{font-size:0.7rem;color:rgba(255,255,255,0.28);margin-bottom:1.1rem}
+.price-features{list-style:none;margin-bottom:1.4rem}
+.price-features li{font-size:0.78rem;color:rgba(255,255,255,0.58);padding:0.28rem 0;border-bottom:0.5px solid rgba(255,255,255,0.06);display:flex;gap:0.4rem}
+.price-features li::before{content:'✓';color:var(--accent);flex-shrink:0}
+.btn-price{display:block;text-align:center;background:var(--accent);color:#fff;padding:0.78rem;border-radius:2rem;font-weight:600;font-size:0.84rem;text-decoration:none;border:none;cursor:pointer;transition:opacity 0.2s;width:100%}
+.btn-price:hover{opacity:0.85}
+.btn-price.ghost{background:transparent;border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.65)}
+.disclaimer{margin-top:1.4rem;font-size:0.72rem;color:rgba(255,255,255,0.22);text-align:center;line-height:1.8}
+.bonus-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:0.65rem;margin-top:1.6rem}
+.bonus-item{border:0.5px solid rgba(255,255,255,0.06);border-radius:0.7rem;padding:1rem}
+.bonus-item h4{font-size:0.83rem;font-weight:600;margin-bottom:0.22rem}
+.bonus-item p{font-size:0.72rem;color:rgba(255,255,255,0.38)}
+.bonus-tag{display:inline-block;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:rgba(200,98,42,0.14);color:var(--accent);padding:0.1rem 0.5rem;border-radius:1rem;margin-bottom:0.4rem}
+
+/* ACCORDION */
+.acc-list{margin-top:2rem}
+.acc-item{border-bottom:0.5px solid var(--border)}
+.acc-q{width:100%;background:none;border:none;text-align:left;padding:1.05rem 0;font-family:var(--font-body);font-size:0.9rem;font-weight:600;color:var(--warm-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.acc-arrow{flex-shrink:0;transition:transform 0.25s;color:var(--accent)}
+.acc-item.open .acc-arrow{transform:rotate(180deg)}
+.acc-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+.acc-a-inner{padding:0 0 1rem;font-size:0.83rem;color:var(--mid);line-height:1.7}
+
+.final-cta{text-align:center;padding:6rem 5%;background:var(--cream)}
+.final-cta h2{margin-bottom:0.8rem}
+.final-cta p{color:var(--mid);max-width:400px;margin:0 auto 2.2rem;font-size:0.9rem}
+
+.buffer{padding:3.5rem 5%;background:var(--warm-dark);color:#fff;text-align:center}
+.buffer-title{font-family:var(--font-display);font-size:clamp(1.3rem,2.5vw,2rem);margin-bottom:0.4rem}
+.buffer-title em{color:var(--accent);font-style:italic}
+.buffer-sub{font-size:0.82rem;color:rgba(255,255,255,0.35);max-width:440px;margin:0 auto}
+
+footer{padding:1.4rem 5%;border-top:0.5px solid var(--border)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.7rem}
+.footer-copy{font-size:0.72rem;color:var(--mid)}
+.footer-socials{display:flex;gap:0.55rem}
+.social-link{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);color:var(--mid);text-decoration:none;transition:border-color 0.2s,color 0.2s}
+.social-link:hover{border-color:var(--accent);color:var(--accent)}
+.social-link svg{width:14px;height:14px;fill:currentColor}
+
+@media(max-width:768px){
+  section{padding:3.5rem 5%}
+  .hero{padding:2rem 5% 3rem}
+  .hero h1{white-space:normal;font-size:clamp(2.8rem,10vw,5rem)}
+  .hero-deco{display:none}
+  .lessons-cards{grid-template-columns:repeat(3,1fr)}
+  .nagnetal,.summer,.buffer,.pricing{padding:3.2rem 5%}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">МОЙ AI</div>
+  <a href="#pricing" class="nav-cta">Хочу курс →</a>
+</nav>
+
+<div class="timer-bar">
+  <p>🎁 При покупке в первые 24 часа — бонус на выбор</p>
+  <div class="timer-countdown">
+    <div class="timer-unit" id="t-h">23</div>
+    <span class="timer-sep">:</span>
+    <div class="timer-unit" id="t-m">59</div>
+    <span class="timer-sep">:</span>
+    <div class="timer-unit" id="t-s">00</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-deco">AI</div>
+  <div class="hero-line"></div>
+  <span class="hero-tag">Онлайн-курс · В записи · Смотришь в своём темпе</span>
+  <h1 id="heroTitle"></h1>
+  <p class="hero-from">От нуля до результата</p>
+  <p class="hero-sub"><strong>7 уроков работы с Claude — освобождаем часы, которых вечно не хватает.</strong></p>
+  <div class="hero-video">
+    <div class="video-wrap-sm has-video">
+      <iframe src="https://rutube.ru/play/embed/b18d4b6ed677ae95abcbed9aa47e7107?p=s_mb7KSJsyYuD20up2oZ6Q" allow="clipboard-write; autoplay; fullscreen" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+    </div>
+  </div>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary" id="ctaBtn"><span class="pulse-dot"></span>Начать сейчас</a>
+    <a href="#curriculum" class="btn-ghost">Программа</a>
+  </div>
+  <p class="hero-note">Курс в записи — смотришь когда удобно, без ожидания эфиров.</p>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">Личный ассистент</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Экономия времени</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Живые кейсы</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Без программирования</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Работает за тебя</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Свободное время</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Личный ассистент</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Экономия времени</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Живые кейсы</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Без программирования</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Работает за тебя</span><span class="ticker-sep">·</span>
+    <span class="ticker-item">Свободное время</span><span class="ticker-sep">·</span>
+  </div>
+</div>
+
+<!-- NAGNETAL -->
+<section class="nagnetal">
+  <div class="reveal">
+    <h2>Пока ты думаешь где поучиться —<br><em>другие уже работают.</em></h2>
+    <p class="nagnetal-sub">Все ищут дельный курс по AI. Открывают, не понимают с чего начать, закрывают. Пробуют на пол-мощности. А те кто разобрался — уже делегируют рутину, освобождают часы, делают больше.</p>
+    <p class="nagnetal-quote">Меня спрашивают про дельные курсы по AI. Я устала отвечать по одному — поэтому собрала всё сюда.</p>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section>
+  <div class="reveal">
+    <p class="section-label">Узнаёшь себя?</p>
+    <h2>Слышала про нейросети.<br><em>Но так и не начала.</em></h2>
+    <div class="block-toggle" id="painsToggle">
+      <span>Узнай себя</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="block-body" id="painsBody">
+      <div class="pain-grid">
+        <div class="pain-item">
+          <svg class="pain-icon" viewBox="0 0 30 30" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><circle cx="15" cy="15" r="10"/><path d="M15 10v5"/><circle cx="15" cy="19" r="1" fill="#C8622A"/></svg>
+          <p>Слышала про Claude, нейросети — все говорят, а ты киваешь и не понимаешь с чего начать</p>
+        </div>
+        <div class="pain-item">
+          <svg class="pain-icon" viewBox="0 0 30 30" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="4" width="16" height="22" rx="2"/><path d="M10 13h10M10 18h7"/><path d="M21 2l7 7-7 7"/></svg>
+          <p>Открыла, не знала что написать — закрыла. Так и лежит. Кажется что просто не для тебя.</p>
+        </div>
+        <div class="pain-item">
+          <svg class="pain-icon" viewBox="0 0 30 30" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M4 15h22M10 8l-6 7 6 7M20 8l6 7-6 7"/></svg>
+          <p>Пользуешься GPT или DeepSeek — разрозненные чаты без памяти. Каждый раз начинаешь сначала.</p>
+        </div>
+        <div class="pain-item">
+          <svg class="pain-icon" viewBox="0 0 30 30" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M5 24l18-5M5 24l3-11 8 4 6-13"/><circle cx="24" cy="5" r="2.5"/></svg>
+          <p>Боишься отстать — все уже умеют, а ты нет. Кажется поезд уходит.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUMMER -->
+<div class="summer reveal">
+  <h2>Проведи лето так,<br>чтобы в сентябре <em>начать год по-другому.</em></h2>
+  <p>7 уроков. Один раз настроила — работает всегда. В сентябре ты уже не ищешь новых курсов — ты работаешь.</p>
+</div>
+
+<!-- BENEFITS -->
+<section>
+  <div class="reveal">
+    <p class="section-label">Мои кейсы в деньгах</p>
+    <h2>Claude заменяет<br><em>целую команду</em></h2>
+    <p class="benefits-hook">Я не нанимала команду. Я просто научилась пользоваться одним инструментом.</p>
+    <div class="block-toggle" id="benefitsToggle">
+      <span>Смотреть мои кейсы в деньгах</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="block-body" id="benefitsBody">
+      <div class="benefits-grid">
+        <div class="benefit-item">
+          <svg class="benefit-icon" viewBox="0 0 32 32" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="9" width="20" height="16" rx="2"/><path d="M11 17h10M11 21h7"/><path d="M16 9V5"/></svg>
+          <div class="benefit-value">70 000 ₽</div>
+          <div class="benefit-label">Копирайтер/мес</div>
+          <div class="benefit-sub">Пишет твоим голосом — посты, письма, офферы. Всегда на связи.</div>
+        </div>
+        <div class="benefit-item">
+          <svg class="benefit-icon" viewBox="0 0 32 32" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M4 8h24v16H4z" rx="2"/><path d="M4 12h24M10 8v4M22 8v4"/></svg>
+          <div class="benefit-value">от 30 000 ₽</div>
+          <div class="benefit-label">Лендинг</div>
+          <div class="benefit-sub">Разработка и публикация. Делаешь сама за один урок — этот лендинг тому пример.</div>
+        </div>
+        <div class="benefit-item">
+          <svg class="benefit-icon" viewBox="0 0 32 32" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><circle cx="16" cy="16" r="10"/><path d="M16 10v6l4 3"/></svg>
+          <div class="benefit-value">7ч → 40мин</div>
+          <div class="benefit-label">Рутина в неделю</div>
+          <div class="benefit-sub">Задачи которые съедали полдня — теперь за минуты.</div>
+        </div>
+        <div class="benefit-item">
+          <svg class="benefit-icon" viewBox="0 0 32 32" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="4"/><circle cx="22" cy="10" r="4"/><circle cx="16" cy="22" r="4"/><path d="M14 10h4M13 14l-3 4M19 14l3 4"/></svg>
+          <div class="benefit-value">от 50 000 ₽</div>
+          <div class="benefit-label">Дизайн-кит</div>
+          <div class="benefit-sub">Палитра, шрифты, элементы бренда. Сама за вечер.</div>
+        </div>
+        <div class="benefit-item">
+          <svg class="benefit-icon" viewBox="0 0 32 32" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M10 28V16a6 6 0 1 1 12 0v12"/><path d="M6 28h20"/></svg>
+          <div class="benefit-value">1 подписка</div>
+          <div class="benefit-label">Вся команда</div>
+          <div class="benefit-sub">Копирайтер, дизайнер, аналитик, ассистент — всё внутри.</div>
+        </div>
+      </div>
+      <div class="benefits-total">
+        Итого если покупать по отдельности: <strong>от 150 000 ₽/мес</strong><br>
+        Подписка Claude Pro: <strong>~2 000 ₽/мес</strong>
+      </div>
+      <div class="benefits-personal">
+        За последние 3 месяца Claude сэкономил мне минимум 40 рабочих часов. Это целая рабочая неделя.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASES -->
+<section style="background:#fff" id="cases">
+  <div class="reveal">
+    <p class="section-label">То, что я делаю сама</p>
+    <h2>Не теория.<br><em>Живые кейсы.</em></h2>
+    <div class="block-toggle" id="casesToggle">
+      <span>Смотреть примеры из жизни</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="block-body" id="casesBody">
+      <div class="cases-grid">
+        <div class="case-item"><span class="case-label">Фотография</span><h4>400 фото по папкам учеников</h4><p>Час-полтора руками → Claude Cowork сделал сам за минуты.</p></div>
+        <div class="case-item"><span class="case-label">Лендинг</span><h4>Этот лендинг</h4><p>Сделан с помощью Claude. От идеи до публикации — без разработчика.</p></div>
+        <div class="case-item"><span class="case-label">Дизайн</span><h4>Дизайн-кит для продукта</h4><p>Раньше — от 50 000 ₽ дизайнеру. Теперь — сама за вечер.</p></div>
+        <div class="case-item"><span class="case-label">Финансы</span><h4>Анализ банковской выписки</h4><p>Загрузила выписку — получила таблицу с аналитикой.</p></div>
+        <div class="case-item"><span class="case-label">Дети</span><h4>Уроки с детьми — быстро</h4><p>Объяснить тему, разобрать задачу. Больше времени на себя.</p></div>
+        <div class="case-item"><span class="case-label">Жизнь</span><h4>Застряла в другой стране</h4><p>Нашёл варианты, поддержал, помог разобраться.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section id="curriculum">
+  <div class="reveal">
+    <p class="section-label">Программа</p>
+    <h2>7 уроков.<br><em>Нажми — узнай что внутри.</em></h2>
+    <div class="block-toggle" id="curriculumToggle">
+      <span>Открыть программу курса</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="block-body" id="curriculumBody">
+      <div class="lessons-cards" id="lessonsGrid">
+        <div class="lesson-card" data-lesson="0"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg><div class="lesson-num-card">1</div><div class="lesson-title-card">Установка и первый запуск</div></div>
+        <div class="lesson-card" data-lesson="1"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3M8 22h8"/></svg><div class="lesson-num-card">2</div><div class="lesson-title-card">Как разговаривать + Проекты</div></div>
+        <div class="lesson-card" data-lesson="2"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="lesson-num-card">3</div><div class="lesson-title-card">Скиллы</div></div>
+        <div class="lesson-card" data-lesson="3"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8l3 3 5-5"/></svg><div class="lesson-num-card">4</div><div class="lesson-title-card">Claude Cowork</div></div>
+        <div class="lesson-card" data-lesson="4"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg><div class="lesson-num-card">5</div><div class="lesson-title-card">Артефакты + Дизайн-кит</div></div>
+        <div class="lesson-card" data-lesson="5"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="lesson-num-card">6</div><div class="lesson-title-card">Лендинг и вайб-кодинг</div></div>
+        <div class="lesson-card" data-lesson="6"><svg class="lesson-icon-card" viewBox="0 0 24 24" fill="none" stroke="#C8622A" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><div class="lesson-num-card">7</div><div class="lesson-title-card">Вдохновение</div></div>
+      </div>
+      <div class="lesson-detail" id="lessonDetail"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR WHO -->
+<section style="background:#fff">
+  <div class="reveal">
+    <p class="section-label">Для кого</p>
+    <h2>Для тех, кто<br><em>берёт и делает.</em></h2>
+    <div class="forwhom-grid">
+      <div class="forwhom-col yes">
+        <h4>✓ Это твоё</h4>
+        <ul class="forwhom-list">
+          <li>Хочешь разобраться раз и навсегда</li>
+          <li>Строишь что-то своё — нужна команда без бюджета</li>
+          <li>Ценишь время и хочешь его освободить</li>
+          <li>Готова взять и сделать, а не ждать</li>
+          <li>Не технарь — и не нужно им становиться</li>
+        </ul>
+      </div>
+      <div class="forwhom-col no">
+        <h4>— Мимо</h4>
+        <ul class="forwhom-list">
+          <li>Хочешь "когда-нибудь попробовать"</li>
+          <li>Ищешь курс по программированию</li>
+          <li>Нужен только телефон без компьютера</li>
+          <li>Привык ждать эфиров и не делать между ними</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="reveal">
+    <p class="section-label">Стоимость</p>
+    <h2>Выбери <em>свой формат</em></h2>
+    <div class="pricing-grid">
+      <div class="price-card reveal reveal-delay-1">
+        <p class="price-label">Попробовать</p>
+        <p class="price-amount">7 000 ₽</p>
+        <p class="price-period">Доступ на 7 дней</p>
+        <ul class="price-features"><li>Все 7 уроков</li><li>Материалы и инструкции</li></ul>
+        <a href="https://payform.ru/ehbNHT9/" target="_blank" rel="noopener" class="btn-price ghost">Оплатить · 7 000 ₽</a>
+      </div>
+      <div class="price-card featured reveal reveal-delay-2">
+        <div class="price-badge">Популярный</div>
+        <p class="price-label">Разобраться</p>
+        <p class="price-amount">10 000 ₽</p>
+        <p class="price-period">Доступ на 2 недели</p>
+        <ul class="price-features"><li>Все 7 уроков</li><li>Материалы и инструкции</li><li>Бонус: 3 урока по аватарам</li><li>Бонус: уроки фото и видео</li><li>Помощь с установкой</li></ul>
+        <a href="https://payform.ru/j3bNIrQ/" target="_blank" rel="noopener" class="btn-price">Оплатить · 10 000 ₽</a>
+      </div>
+      <div class="price-card reveal reveal-delay-3">
+        <p class="price-label">Навсегда</p>
+        <p class="price-amount">15 000 ₽</p>
+        <p class="price-period">Бессрочный доступ</p>
+        <ul class="price-features"><li>Все 7 уроков навсегда</li><li>Все обновления курса</li><li>Все бонусы</li><li>Рассрочка доступна</li><li>Помощь с установкой</li></ul>
+        <a href="https://payform.ru/cgbNIok/" target="_blank" rel="noopener" class="btn-price">Оплатить · 15 000 ₽</a>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;margin:1.8rem 0">
+      <div style="flex:1;height:0.5px;background:rgba(255,255,255,0.07)"></div>
+      <span style="font-size:0.68rem;color:rgba(255,255,255,0.28);padding:0 0.7rem;white-space:nowrap">Бонусы при покупке</span>
+      <div style="flex:1;height:0.5px;background:rgba(255,255,255,0.07)"></div>
+    </div>
+    <div class="bonus-grid">
+      <div class="bonus-item"><span class="bonus-tag">Бонус 1</span><h4>3 урока: Говорящий аватар</h4><p>AI-аватар который говорит за тебя.</p></div>
+      <div class="bonus-item"><span class="bonus-tag">Бонус 2</span><h4>Работа с фото и видео</h4><p>Обработка и организация через AI.</p></div>
+      <div class="bonus-item"><span class="bonus-tag">Бонус 3</span><h4>Лёгкий старт</h4><p>Помощь с установкой если что-то пошло не так.</p></div>
+    </div>
+    <p class="disclaimer">Подписка Claude Pro оплачивается отдельно · Нужен компьютер с Chrome · Не твоё после 3 уроков — вернём деньги</p>
+  </div>
+</section>
+
+<!-- OBJECTIONS -->
+<section>
+  <div class="reveal">
+    <p class="section-label">Вопросы</p>
+    <h2>Часто<br><em>спрашивают</em></h2>
+    <div class="acc-list">
+      <div class="acc-item"><button class="acc-q">Это сложно? Я совсем не технарь.<svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-a"><div class="acc-a-inner">Именно для тебя и сделан курс. Никакого программирования. Всё показываю на своём экране — где нажать, что написать.</div></div></div>
+      <div class="acc-item"><button class="acc-q">Нужен мощный компьютер?<svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-a"><div class="acc-a-inner">Любой ноутбук с браузером Chrome. Claude работает в облаке — никаких требований к железу.</div></div></div>
+      <div class="acc-item"><button class="acc-q">А вдруг не успею за неделю?<svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-a"><div class="acc-a-inner">7 уроков по 15–20 минут — можно пройти за 2 дня. Бессрочный доступ снимает этот вопрос совсем.</div></div></div>
+      <div class="acc-item"><button class="acc-q">Нужна платная подписка Claude?<svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-a"><div class="acc-a-inner">Для старта хватает бесплатного тарифа. Pro открывает больше возможностей — но не обязательна. Расскажу в первом уроке.</div></div></div>
+      <div class="acc-item"><button class="acc-q">Курс устареет?<svg class="acc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc-a"><div class="acc-a-inner">Базовые принципы стабильны. При бессрочном доступе все обновления включены автоматически.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta reveal">
+  <h2>Лето идёт.<br><em>Те кто начал — уже внедряют.</em></h2>
+  <p>В сентябре ты либо в игре — либо всё ещё ищешь.</p>
+  <a href="#pricing" class="btn-primary" id="ctaBtn2"><span class="pulse-dot"></span>Начать сейчас →</a>
+</section>
+
+<!-- BUFFER -->
+<div class="buffer reveal">
+  <p class="buffer-title">МОЙ AI · <em>От нуля до результата</em></p>
+  <p class="buffer-sub">Это не про технологии. Это про твоё время, твои задачи, твою жизнь. Один раз разобралась — работает всегда.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <p class="footer-copy">МОЙ AI · От нуля до результата · Курс Анастасии Елагиной · 2026</p>
+    <div class="footer-socials">
+      <!-- ВСТАВИТЬ ССЫЛКИ: замени # на свои Instagram и Telegram -->
+      <a href="#" class="social-link" aria-label="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://t.me/elagina_anastasia" target="_blank" rel="noopener" class="social-link" aria-label="Telegram">
+        <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Вау, ты решительная! Всё получится 🔥</div>
+
+<script>
+// TIMER
+const deadline=new Date(Date.now()+24*60*60*1000);
+function updateTimer(){
+  const diff=deadline-Date.now();
+  if(diff<=0){document.querySelector('.timer-bar').style.display='none';return}
+  document.getElementById('t-h').textContent=String(Math.floor(diff/3600000)).padStart(2,'0');
+  document.getElementById('t-m').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  document.getElementById('t-s').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+}
+updateTimer();setInterval(updateTimer,1000);
+
+// HERO TITLE
+const title=document.getElementById('heroTitle');
+const words=[{text:'МОЙ ',em:false},{text:'AI',em:true}];
+let charIdx=0;
+const allChars=[];
+words.forEach(w=>{[...w.text].forEach(c=>allChars.push({char:c,em:w.em}))});
+function typeChar(){
+  if(charIdx>=allChars.length)return;
+  const {char,em}=allChars[charIdx];
+  const span=document.createElement('span');
+  span.className='char';
+  span.style.animationDelay=(charIdx*0.07)+'s';
+  if(em){const e=document.createElement('em');e.textContent=char;span.appendChild(e)}
+  else{span.innerHTML=char===' '?'&nbsp;':char}
+  title.appendChild(span);
+  charIdx++;
+  setTimeout(typeChar,70);
+}
+setTimeout(typeChar,300);
+
+// TOAST
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+document.getElementById('ctaBtn').addEventListener('click',showToast);
+document.getElementById('ctaBtn2').addEventListener('click',showToast);
+
+// SCROLL REVEAL
+const revealEls=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{threshold:0.08});
+revealEls.forEach(el=>obs.observe(el));
+
+// TOGGLES
+function makeToggle(btnId,bodyId){
+  const btn=document.getElementById(btnId);
+  const body=document.getElementById(bodyId);
+  if(!btn||!body)return;
+  btn.addEventListener('click',()=>{
+    const open=body.style.maxHeight&&body.style.maxHeight!=='0px';
+    if(open){body.style.maxHeight='0';btn.classList.remove('open')}
+    else{body.style.maxHeight=body.scrollHeight+'px';btn.classList.add('open')}
+  });
+}
+makeToggle('painsToggle','painsBody');
+makeToggle('benefitsToggle','benefitsBody');
+makeToggle('casesToggle','casesBody');
+makeToggle('curriculumToggle','curriculumBody');
+
+// LESSON CARDS
+const lessonData=[
+  {title:'Установка и первый запуск',text:'Claude, расширение Chrome, Aqua Voice — один раз настраиваем, работает всегда. Честно о том, что Claude делает хорошо и где не стоит рассчитывать. Первый запрос прямо в уроке.'},
+  {title:'Как разговаривать с Claude + Проекты',text:'Из чего хочу, для кого, что наговорить голосом. Сразу создаём личного ассистента — инструкция, файлы, память. Он будет знать кто ты и зачем.'},
+  {title:'Скиллы — только нужные',text:'Что такое скиллы, где брать, как создать под себя. Пишем, устанавливаем, пробуем. Только то, что реально нужно — без мусора.'},
+  {title:'Claude Cowork — он делает за тебя',text:'Агент на компьютере. Какие доступы даём, что может делать. Живые кейсы: папки учеников, анализ документов, структурирование файлов.'},
+  {title:'Артефакты + Дизайн-кит',text:'Что Claude создаёт: таблицы, странички, PDF. Анализируем расходы за месяц. Тут же делаем дизайн-кит — то, что раньше стоило 50 000 ₽.'},
+  {title:'Лендинг и вайб-кодинг',text:'Делаем свой лендинг прямо в уроке и публикуем. Введение в вайб-кодинг — сайты без программирования. Уходишь с готовым результатом.'},
+  {title:'Вдохновение — как ещё можно',text:'Меню питания, спорт, путешествия, поддержка в трудный момент. Идеи как использовать Claude под свою жизнь — и куда двигаться дальше.'}
+];
+const cards=document.querySelectorAll('.lesson-card');
+const detail=document.getElementById('lessonDetail');
+cards.forEach(card=>{
+  card.addEventListener('click',()=>{
+    const idx=parseInt(card.dataset.lesson);
+    const isActive=card.classList.contains('active');
+    cards.forEach(c=>c.classList.remove('active'));
+    if(isActive){detail.classList.remove('visible');detail.innerHTML='';return}
+    card.classList.add('active');
+    const d=lessonData[idx];
+    detail.innerHTML='<strong>Урок '+(idx+1)+': '+d.title+'</strong>'+d.text;
+    detail.classList.add('visible');
+    detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+});
+
+// ACCORDION
+document.querySelectorAll('.acc-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.parentElement;
+    const answer=item.querySelector('.acc-a');
+    const isOpen=item.classList.contains('open');
+    document.querySelectorAll('.acc-item').forEach(i=>{i.classList.remove('open');i.querySelector('.acc-a').style.maxHeight='0'});
+    if(!isOpen){item.classList.add('open');answer.style.maxHeight=answer.scrollHeight+'px'}
+  });
+});
+</script>
+</body>
+</html>
